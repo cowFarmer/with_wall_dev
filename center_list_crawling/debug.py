@@ -33,7 +33,6 @@ def get_driver():
 
 # 검색어 입력
 def search_place(driver:WebDriver, search_text: str):
-  print("search_place")
   search_input_box = driver.find_element_by_css_selector("div.input_box>input.input_search")
   search_input_box.send_keys(search_text)
   search_input_box.send_keys(Keys.ENTER)
@@ -41,7 +40,6 @@ def search_place(driver:WebDriver, search_text: str):
 
 # 다음 페이지 이동 및 마지막 페이지 검사
 def next_page_move(driver:WebDriver):
-  print("next_page_move")
   # 페이지네이션 영역에 마지막 버튼 선택
   next_page_btn = driver.find_element_by_css_selector('div.zRM9F>a:last-child')
   next_page_class_name = BeautifulSoup(next_page_btn.get_attribute('class'), "html.parser")
@@ -56,32 +54,26 @@ def next_page_move(driver:WebDriver):
 
 # 검색 iframe 이동
 def to_search_iframe(driver:WebDriver):
-  print("to_search_iframe")
-  # 이 과정에서 5개만 찾고 못찾는 버그 있음
   driver.switch_to.default_content()
   driver.switch_to.frame('searchIframe')
 
 # element 텍스트 추출
 def get_element_to_text(element):
-  print("get_element_to_text")
   return BeautifulSoup(element, "html.parser").get_text()
 
 # 매장정보 추출
 def get_store_data(driver:WebDriver, scroll_container: WebElement, file: TextIOWrapper):
-  print("get_store_data")
   # 현재 페이지 매장 리스트
-  get_store_li = scroll_container.find_elements_by_css_selector('ul > li')
+  get_store_li = scroll_container.find_elements_by_css_selector('#_pcmap_list_scroll_container > ul > li')
   
   for index in range(len(get_store_li)):
     # json 파일 저장 init
     # 매장 이름, 네이버 카테고리, 주소, url, 메인 사진 url, 가격, 시간, 레벨, 바뀌는 주기
-    json_data = {}
-    json_list = ['store_name', 'naver_category', 'address', 'naver_map_url', 'main_img_url', 'price_list', 'open_time', 'level', 'change_time']
-    store_name = naver_category = address = naver_map_url = main_img_url = price_list = open_time = level = change_time = ''
-    json_var_list = [store_name, naver_category, address, naver_map_url, main_img_url, price_list, open_time, level, change_time]
+    climing_info = {}
+    store_name = naver_category = address = naver_map_url = main_img_url = ''
+    price_list, open_time_list, level_list, change_time_list = [], [], [], []
     
-    
-    selectorArgument = 'div:nth-of-type(1) > div.ouxiq.icT4K > a:nth-child(1)'
+    selectorArgument = 'div:nth-of-type(1) > div.ouxiq > a:nth-child(1)'
     wrapper_html = get_store_li[index].get_attribute('innerHTML')
     wrapper_soup = BeautifulSoup(wrapper_html, "html.parser")
 
@@ -101,56 +93,97 @@ def get_store_data(driver:WebDriver, scroll_container: WebElement, file: TextIOW
         to_search_iframe(driver)
         
       # 매장 이름, 네이버 카테고리, 주소, url, 메인 사진 url, 가격, 시간, 레벨, 바뀌는 주기
+      # store_name, naver_category, address, naver_map_url, main_img_url, price_list, open_time_list, level_list, change_time_list
       
-      # 매장 이름
-      store_name = driver.find_element_by_css_selector('#_title > span:nth-child(1)').get_attribute('innerHTML')
+      # store_name
+      try:
+        store_name = driver.find_element_by_css_selector('#_title > span:nth-child(1)').get_attribute('innerHTML')
+        store_name = get_element_to_text(store_name)
+      except:
+        pass
+      
 
       # 네이버 카테고리
-      if driver.find_element_by_css_selector('#_title > span:nth-child(2)').is_displayed():
-        naver_category = driver.find_element_by_css_selector('#_title > span:nth-child(2)').get_attribute('innerHTML')
-      else:
-        naver_category = ''
+      try:
+        if driver.find_element_by_css_selector('#_title > span:nth-child(2)').is_displayed():
+            naver_category = driver.find_element_by_css_selector('#_title > span:nth-child(2)').get_attribute('innerHTML')
+        else:
+            pass
+        naver_category = get_element_to_text(naver_category)
+      except:
+        pass
+      
       
       # 주소
-      address = driver.find_element_by_css_selector('div > a > span.LDgIH').get_attribute('innerHTML')
+      try:
+        address = driver.find_element_by_css_selector('div > a > span.LDgIH').get_attribute('innerHTML')
+        address = get_element_to_text(address)
+      except:
+        pass
       
       # url
-      naver_map_url = driver.current_url
+      try:
+        naver_map_url = driver.current_url
+      except:
+        pass
       
       # 메인 사진 url
-      tmp = str(wrapper_soup)
-      main_img_url = tmp.split('src="')[1].split('"')[0]
-      print("메인 이미지 url")
-      print(main_img_url)
+      try:
+        tmp = str(wrapper_soup)
+        main_img_url = tmp.split('src="')[1].split('"')[0]
+      except:
+        pass
+      
+      
       # 가격
-      price_list = driver.find_element(By.CSS_SELECTOR, "div.O8qbU.tXI2c > div > ul > li").text
-      print("가격 리스트")
-      print(price_list)
+      try:
+        price_li_elements = driver.find_elements_by_css_selector('div.O8qbU.tXI2c > div > ul > li')
+        price_li_text = [element.text for element in price_li_elements]
+        for i in price_li_text:
+            tmp = i.replace("\n", "=").replace(",000원", "000")
+            price_list.append(tmp)
+      except:
+        price_list = []
+      
       # 시간
+      try:
+        driver.find_element_by_css_selector('div.O8qbU.pSavy > div > a').click()
+        time.sleep(1)
+        time_li_elements = driver.find_elements_by_css_selector('div.O8qbU.pSavy > div > a > div')
+        time_li_text = [element.text for element in time_li_elements]
+        for i in time_li_text:
+            tmp = i.replace("\n", "=").replace("=접기", "")
+            open_time_list.append(tmp)
+        open_time_list.pop(0)
+      except:
+          open_time_list = []
+          
       
       # 레벨
+      # 네이버지도에서 크롤링 불가능
       # 바뀌는 주기
+      # 네이버지도에서 크롤링 불가능
       
       
-      # store_name, naver_category, address, naver_map_url, main_img_url, price_list, open_time, level, change_time
-      store_name = get_element_to_text(store_name)
-      naver_category = get_element_to_text(naver_category)
-      address = get_element_to_text(address)
-      price_list = get_element_to_text(price_list)
       
-      
-      for i in range(len(json_list)):
-          json_data.update({json_list[i]: json_var_list[i]})
+      climing_info = {'store_name': store_name, 'naver_category': naver_category, 'address': address, 'naver_map_url': naver_map_url, 'main_img_url': main_img_url, 'price_list': price_list, 'open_time_list': open_time_list, 'level_list': level_list, 'change_time_list': change_time_list}
+      print('-'*15)
+      print(climing_info)
+      print('\n'*5)
+      json_data['climing_list'].append(climing_info)
       
       with open('list.json', 'w') as f:
-          json.dump(json_data, f, indent=2)
+          json.dump(json_data, f, ensure_ascii=False, indent=4)
       to_search_iframe(driver)
     except TimeoutException:
       to_search_iframe(driver)
 
 # 메인 함수
 def naver_crawl():
-  filer = open('./list.json','a',encoding='utf-8')
+  with open('./list.json', 'r', encoding="UTF-8") as json_file:
+      filer = json.load(json_file)
+      json_data = filer
+#   filer = open('./list.json','a',encoding='utf-8')
   driver = get_driver()
   search_place(driver,'클라이밍')
   to_search_iframe(driver)
@@ -163,8 +196,8 @@ def naver_crawl():
 
   try:
     while True:
+      # 스크롤 내리는 자바 스크립트 코드 실행
       for i in range(6):
-        # 스크롤 내리는 자바 스크립트 코드 실행
         driver.execute_script("arguments[0].scrollBy(0,2000)",scroll_container)
         time.sleep(1)
       get_store_data(driver,scroll_container,filer)
@@ -173,5 +206,8 @@ def naver_crawl():
         break
   except:
     print("크롤링 과정 중 에러 발생")
-    
+
+# init
+json_data = {}
+json_data['climing_list'] = []
 naver_crawl()

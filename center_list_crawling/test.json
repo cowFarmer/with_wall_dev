@@ -1,0 +1,26 @@
+{
+    "climing_list": [
+        {
+            "store_name": "100",
+            "naver_category": "100",
+            "address": "100",
+            "naver_map_url": "100",
+            "main_img_url": "100",
+            "price_list": "100",
+            "open_time": "100",
+            "level": "100",
+            "change_time": "100"
+        },
+        {
+            "store_name": "123",
+            "naver_category": "naver_category",
+            "address": "address",
+            "naver_map_url": "naver_map_url",
+            "main_img_url": "main_img_url",
+            "price_list": "price_list",
+            "open_time": "100",
+            "level": "100",
+            "change_time": "100"
+        }
+    ]
+}
