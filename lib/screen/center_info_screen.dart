@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:with_wall/component/search.dart';
 import 'package:with_wall/const/colors.dart';
 import 'center_list_screen.dart';
 
@@ -21,7 +22,7 @@ class _CenterInfoScreenState extends State<CenterInfoScreen> {
   void initState() {
     super.initState();
     scroll.addListener(() {
-      if (scroll.position.pixels == scroll.position.maxScrollExtent){
+      if (scroll.position.pixels == scroll.position.maxScrollExtent) {
         print("scroll 끝까지 함");
       }
     });
@@ -29,17 +30,25 @@ class _CenterInfoScreenState extends State<CenterInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height,
-        ),
-        child: ListView(
-          children: <Widget>[
-            CenterImg(),
-            Text("main_img_url 참고해서 넣기", style: TextStyle(fontSize: 25),),
-            CenterInfo(),
-            CenterRecommendPost(),
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Search(),
+            ),
+            Expanded(
+              flex: 15,
+              child: ListView(
+                children: [
+                  CenterImg(),
+                  Text("main_img_url 참고해서 넣기", style: TextStyle(fontSize: 25),),
+                  CenterInfo(),
+                  CenterRecommendPost(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -95,8 +104,6 @@ class CenterInfo extends StatelessWidget {
 }
 
 class CenterRecommendPost extends StatelessWidget {
-  final List<int> _Numbers = List.generate(9, (index) => index);
-
   CenterRecommendPost({Key? key}) : super(key: key);
 
   @override
@@ -114,7 +121,9 @@ class CenterRecommendPost extends StatelessWidget {
               height: 50,
               color: Colors.blueGrey,
               child: Center(
-                child: Text('Item $index',),
+                child: Text(
+                  'Item $index',
+                ),
               ),
             );
           }),

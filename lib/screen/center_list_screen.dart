@@ -15,7 +15,7 @@ class CenterListScreen extends StatefulWidget {
 class _CenterListScreenState extends State<CenterListScreen> {
   var PlaceInfo = SampleData();
   List<int> CenterIdxNumbers = [];
-  List<int> TestIdxNumbers = List.generate(100, (index) => index);
+  List<int> TestIdxNumbers = List.generate(10, (index) => index);
 
   GetCenterList() async {
     setState(() {
