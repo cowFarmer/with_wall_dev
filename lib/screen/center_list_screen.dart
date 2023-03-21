@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:with_wall/component/search.dart';
 import 'package:with_wall/const/colors.dart';
 import 'package:with_wall/component/center_info.dart';
@@ -14,52 +13,56 @@ class CenterListScreen extends StatefulWidget {
 }
 
 class _CenterListScreenState extends State<CenterListScreen> {
-  final List<int> numbers = List.generate(100, (index) => index);
-  var PlaceInfo;
+  var PlaceInfo = SampleData();
+  List<int> CenterIdxNumbers = [];
+  List<int> TestIdxNumbers = List.generate(100, (index) => index);
 
   GetCenterList() async {
-    print("GetCenterList 실행");
-    final routeFromJsonFile = await rootBundle.loadString('asset/center_list_json/test.json');
-    PlaceInfo = PlaceList.fromJson(routeFromJsonFile).places ?? <Place>[];
-    print(PlaceInfo["store_name"]);
-    return PlaceInfo;
+    setState(() {
+      CenterIdxNumbers = List.generate(PlaceInfo.TestData.length, (index) => index);
+
+      // List<int> CenterIdxNumbers = List.generate(PlaceInfo.TestData.length, (index) => index);
+      // print("${PlaceInfo.TestData[0]['store_name']}");
+      // print("${PlaceInfo.TestData.length}"); // store 개수
+    });
+    // var routeFromJsonFile = await rootBundle.loadString('asset/center_list_json/center_list_json.json');
   }
 
   @override
   void initState() {
     super.initState();
-    print("initstate 실행");
     GetCenterList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Search(),
-            ),
-            Expanded(
-              flex: 15,
-              child: SingleChildScrollView(
-                physics: ClampingScrollPhysics(),
-                child: Column(
-                  children: numbers
-                      .map(
-                        (e) => CenterInfo(
-                          centerNumber: e,
-                        ),
-                      ).toList(),
+    if (CenterIdxNumbers.isNotEmpty) {
+      return SafeArea(
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Search(),
+              ),
+              Expanded(
+                flex: 15,
+                child: SingleChildScrollView(
+                  physics: ClampingScrollPhysics(),
+                  child: Column(
+                    children: TestIdxNumbers.map((e) => CenterInfo(centerNumber: e,),).toList(),
+                  ),
+
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
+    else {
+      return CircularProgressIndicator();
+    }
   }
 
   Widget renderCenter(e) {
@@ -75,8 +78,8 @@ class _CenterListScreenState extends State<CenterListScreen> {
   }
 }
 
-class Data {
-  var TestData = {
+class SampleData {
+  var TestData =
     [
       {
         "store_name": "서울숲클라이밍",
@@ -104,7 +107,7 @@ class Data {
           "일=10:00 - 19:00",
           "월=12:00 - 23:00"
         ],
-        "level_list": [],
+        "level_list": ["빨","주","노","초","파","남"],
         "change_time_list": []
       },
       {
@@ -133,11 +136,10 @@ class Data {
           "일=12:00 - 20:00",
           "월=12:00 - 23:00"
         ],
-        "level_list": [],
+        "level_list": ["남","보","빨","주","노"],
         "change_time_list": []
       }
-    ]
-  };
+    ];
 }
 
 // json -> object
